@@ -40,7 +40,7 @@ set_charging() {
     if $USE_THRESHOLDS; then
         if [ "$enable" -eq 1 ]; then
             echo $LOW_THRESHOLD > "$CHARGE_START"
-            echo 100 > "$CHARGE_END"
+            echo $HIGH_THRESHOLD > "$CHARGE_END"
         else
             echo 0 > "$CHARGE_START"
             echo $HIGH_THRESHOLD > "$CHARGE_END"
