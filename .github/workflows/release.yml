@@ -14,10 +14,10 @@ jobs:
           fetch-depth: 0   # Need full history to get the tag
 
       # If you need to build the zip, add steps here.
-      # Assuming charge-control-module.zip is already in the repo at the tag.
+      # Assuming charge-controller-module.zip is already in the repo at the tag.
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          files: charge-control-module.zip
+          files: charge-controller-module.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
