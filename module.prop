@@ -1,5 +1,5 @@
-id=charge-control
-name=Charge Control Module
+id=charge-controller
+name=Charge Controller Module
 version=1.0.1
 versionCode=1
 author=Sakura679
