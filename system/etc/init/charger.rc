@@ -1,0 +1,7 @@
+# charger.rc – KernelSU 原生服务定义
+service charger-daemon /system/bin/sh /data/adb/modules/charge-control-module/charger-daemon.sh
+    class late_start
+    user root
+    group root system
+    seclabel u:r:magisk:s0
+    oneshot
