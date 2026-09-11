@@ -19,7 +19,7 @@ jobs:
       - name: Set up version
         id: version
         run: |
-          VERSION=$(grep '^version=' module.prop | cut -d'=' -f2)
+          VERSION=$(grep '^version=' module.prop | cut -d'=' -f2 | tr -d '\r')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "TAG=v$VERSION" >> $GITHUB_OUTPUT
 
