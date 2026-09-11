@@ -19,7 +19,51 @@ jobs:
       - name: Set up version
         id: version
         run: |
-          VERSION=$(awk -F= '/^version=/ {print $2}' module.prop)
+          # Try multiple methods to extract version for robustness
+          if [ -f "module.prop" ]; then
+            echo "module.prop found"
+            cat module.prop
+
+            # Method 1: awk (original)
+            VERSION=$(awk -F= '/^version=/ {print $2}' module.prop 2>/dev/null || echo "")
+            if [ -n "$VERSION" ]; then
+              echo "Method 1 (awk) succeeded: $VERSION"
+            else
+              # Method 2: sed
+              VERSION=$(sed -n 's/^version=//p' module.prop 2>/dev/null || echo "")
+              if [ -n "$VERSION" ]; then
+                echo "Method 2 (sed) succeeded: $VERSION"
+              else
+                # Method 3: grep + cut
+                VERSION=$(grep '^version=' module.prop | cut -d= -f2 2>/dev/null || echo "")
+                if [ -n "$VERSION" ]; then
+                  echo "Method 3 (grep+cut) succeeded: $VERSION"
+                else
+                  # Method 4: grep + cut + tr to remove CR
+                  VERSION=$(grep '^version=' module.prop | cut -d= -f2 | tr -d '\r' 2>/dev/null || echo "")
+                  if [ -n "$VERSION" ]; then
+                    echo "Method 4 (grep+cut+tr) succeeded: $VERSION"
+                  else
+                    echo "ERROR: All methods failed to extract version from module.prop"
+                    exit 1
+                  fi
+                fi
+              fi
+            fi
+          else
+            echo "ERROR: module.prop not found"
+            exit 1
+          fi
+
+          # Remove any trailing whitespace or line endings
+          VERSION=$(echo "$VERSION" | tr -d '[:space:]')
+
+          if [ -z "$VERSION" ]; then
+            echo "ERROR: Extracted version is empty"
+            exit 1
+          fi
+
+          echo "Final version: $VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "TAG=v$VERSION" >> $GITHUB_OUTPUT
 
