@@ -19,13 +19,13 @@ CONF="$MODDIR/config/default.conf"
 if [ -f "$CONF" ]; then
     . "$CONF"
     # 使用配置文件中的值，如果未设置则使用默认值
-    LOW_THRESHOLD=${LOW_THRESHOLD:-20}
+    LOW_THRESHOLD=${LOW_THRESHOLD:-30}
     HIGH_THRESHOLD=${HIGH_THRESHOLD:-80}
     POLL_INTERVAL=${POLL_INTERVAL:-300}
     ENABLE_LOG=${ENABLE_LOG:-false}
 else
     # 如果配置文件不存在，使用默认值
-    LOW_THRESHOLD=20
+    LOW_THRESHOLD=30
     HIGH_THRESHOLD=80
     POLL_INTERVAL=300
     ENABLE_LOG=false

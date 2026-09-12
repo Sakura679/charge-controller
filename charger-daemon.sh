@@ -3,10 +3,16 @@
 MODDIR=${0%/*}
 CONF="$MODDIR/config/default.conf"
 [ -f "$CONF" ] && . "$CONF"
-LOW_THRESHOLD=${LOW_THRESHOLD:-20}
+LOW_THRESHOLD=${LOW_THRESHOLD:-30}
 HIGH_THRESHOLD=${HIGH_THRESHOLD:-80}
 POLL_INTERVAL=${POLL_INTERVAL:-300}
 ENABLE_LOG=${ENABLE_LOG:-false}
+
+# 信号处理：确保异常终止时退出
+cleanup() {
+    exit 0
+}
+trap cleanup TERM INT
 
 # 探测接口（与 post-fs-data 保持一致，防止运行时环境变化）
 CHARGING_ENABLED="/sys/class/power_supply/battery/charging_enabled"
@@ -32,7 +38,12 @@ log_msg() {
 log_msg "守护进程启动（模式=${USE_THRESHOLDS:+thresholds：switch}，LOW=$LOW_THRESHOLD% HIGH=$HIGH_THRESHOLD% INTERVAL=$POLL_INTERVAL秒）"
 
 get_battery_capacity() {
-    cat /sys/class/power_supply/battery/capacity 2>/dev/null || echo 0
+    local cap
+    cap=$(cat /sys/class/power_supply/battery/capacity 2>/dev/null) || {
+        echo "$(date) 错误：无法读取电量，守护进程退出" >>"$MODDIR/log.txt"
+        exit 1
+    }
+    echo "$cap"
 }
 
 set_charging() {
@@ -42,8 +53,8 @@ set_charging() {
             echo $LOW_THRESHOLD > "$CHARGE_START"
             echo $HIGH_THRESHOLD > "$CHARGE_END"
         else
-            echo 0 > "$CHARGE_START"
-            echo $HIGH_THRESHOLD > "$CHARGE_END"
+            echo 100 > "$CHARGE_START"
+            echo 0 > "$CHARGE_END"
         fi
     else
         echo $enable > "$CHARGING_ENABLED"

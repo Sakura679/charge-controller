@@ -5,7 +5,7 @@ CONF="$MODDIR/config/default.conf"
 
 # ------ 载入配置（若文件不存在则使用默认值）------
 [ -f "$CONF" ] && . "$CONF"
-LOW_THRESHOLD=${LOW_THRESHOLD:-20}
+LOW_THRESHOLD=${LOW_THRESHOLD:-30}
 HIGH_THRESHOLD=${HIGH_THRESHOLD:-80}
 POLL_INTERVAL=${POLL_INTERVAL:-300}   # 默认 5 分钟（300秒）
 ENABLE_LOG=${ENABLE_LOG:-false}

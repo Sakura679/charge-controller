@@ -7,7 +7,7 @@ DAEMON="$MODDIR/charger-daemon.sh"
 # 读取配置（确保守护进程能拿到同样的变量）
 CONF="$MODDIR/config/default.conf"
 [ -f "$CONF" ] && . "$CONF"
-LOW_THRESHOLD=${LOW_THRESHOLD:-20}
+LOW_THRESHOLD=${LOW_THRESHOLD:-30}
 HIGH_THRESHOLD=${HIGH_THRESHOLD:-80}
 POLL_INTERVAL=${POLL_INTERVAL:-300}
 ENABLE_LOG=${ENABLE_LOG:-false}
