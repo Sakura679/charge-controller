@@ -96,12 +96,13 @@ jobs:
         run: |
           rm -rf charge-control-module
           mkdir -p charge-control-module
-          cp -r charger-daemon.sh post-fs-data.sh service.sh uninstall.sh charge-control-module/
+          cp -r charger-daemon.sh post-fs-data.sh service.sh uninstall.sh customize.sh charge-control-module/
           cp -r config charge-control-module/
           cp module.prop charge-control-module/
           cp README.md charge-control-module/
           cp LICENSE charge-control-module/
           cp -r system charge-control-module/
+          cp IMPLEMENTATION_SUMMARY.md charge-control-module/
 
       - name: Create zip
         run: |
