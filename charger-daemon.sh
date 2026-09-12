@@ -18,12 +18,18 @@ trap cleanup TERM INT
 CHARGING_ENABLED="/sys/class/power_supply/battery/charging_enabled"
 CHARGE_START="/sys/class/power_supply/battery/charge_control_start_threshold"
 CHARGE_END="/sys/class/power_supply/battery/charge_control_end_threshold"
+MMI_CHARGING_ENABLE="/sys/class/power_supply/battery/mmi_charging_enable"
 
 # 决定控制模式
 if [ -w "$CHARGE_START" ] && [ -w "$CHARGE_END" ]; then
     USE_THRESHOLDS=true
+    SWITCH_NODE=""   # not used
 elif [ -w "$CHARGING_ENABLED" ]; then
     USE_THRESHOLDS=false
+    SWITCH_NODE="$CHARGING_ENABLED"
+elif [ -w "$MMI_CHARGING_ENABLE" ]; then
+    USE_THRESHOLDS=false
+    SWITCH_NODE="$MMI_CHARGING_ENABLE"
 else
     echo "$(date) 错误：运行时未找到可写的充电控制接口，守护进程退出" >>"$MODDIR/log.txt"
     exit 1
@@ -35,7 +41,14 @@ log_msg() {
     [ "$ENABLE_LOG" = true ] && echo "$(date '+%Y-%m-%d %H:%M:%S') $msg" >>"$MODDIR/log.txt"
 }
 
-log_msg "守护进程启动（模式=${USE_THRESHOLDS:+thresholds：switch}，LOW=$LOW_THRESHOLD% HIGH=$HIGH_THRESHOLD% INTERVAL=$POLL_INTERVAL秒）"
+# 确定模式描述
+if $USE_THRESHOLDS; then
+    MODE_DESC="thresholds"
+else
+    MODE_DESC="switch"
+fi
+
+log_msg "守护进程启动（模式=${MODE_DESC}，LOW=$LOW_THRESHOLD% HIGH=$HIGH_THRESHOLD% INTERVAL=$POLL_INTERVAL秒）"
 
 get_battery_capacity() {
     local cap
@@ -57,7 +70,7 @@ set_charging() {
             echo 0 > "$CHARGE_END"
         fi
     else
-        echo $enable > "$CHARGING_ENABLED"
+        echo $enable > "$SWITCH_NODE"
     fi
 }
 

@@ -25,6 +25,7 @@ log_msg "读取配置：LOW=$LOW_THRESHOLD%  HIGH=$HIGH_THRESHOLD%  INTERVAL=$PO
 CHARGING_ENABLED="/sys/class/power_supply/battery/charging_enabled"
 CHARGE_START="/sys/class/power_supply/battery/charge_control_start_threshold"
 CHARGE_END="/sys/class/power_supply/battery/charge_control_end_threshold"
+MMI_CHARGING_ENABLE="/sys/class/power_supply/battery/mmi_charging_enable"
 
 # 判断是否可写
 if [ -w "$CHARGE_START" ] && [ -w "$CHARGE_END" ]; then
@@ -33,12 +34,16 @@ if [ -w "$CHARGE_START" ] && [ -w "$CHARGE_END" ]; then
 elif [ -w "$CHARGING_ENABLED" ]; then
     CTL_MODE="switch"
     log_msg "仅检测到可写的充电开关接口：$CHARGING_ENABLED（将使用开/关方式）"
+elif [ -w "$MMI_CHARGING_ENABLE" ]; then
+    CTL_MODE="switch"
+    log_msg "仅检测到可写的充电开关接口（Oppo mmi_charging_enable）：$MMI_CHARGING_ENABLE（将使用开/关方式）"
 else
     log_msg "错误：未找到任何可写的充电控制接口！"
     log_msg "请确认内核已开放以下任意文件的写权限："
     log_msg "  $CHARGING_ENABLED"
     log_msg "  $CHARGE_START"
     log_msg "  $CHARGE_END"
+    log_msg "  $MMI_CHARGING_ENABLE"
     # 创建禁用标志，供 service.sh 检测
     touch "$MODDIR/.charge_control_disabled"
     exit 1   # 非零退出会让管理器把模块标记为安装失败
@@ -46,5 +51,7 @@ fi
 
 # 支持的情况下创建启用标志
 touch "$MODDIR/.charge_control_enabled"
+# 移除禁用标志（如果存在）
+rm -f "$MODDIR/.charge_control_disabled"
 log_msg "内核兼容性检测通过，控制模式：$CTL_MODE"
 log_msg "=== post-fs-data 结束 ==="
