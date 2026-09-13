@@ -19,22 +19,13 @@ if [ -f "$CONF" ]; then
     LOW_THRESHOLD=${LOW_THRESHOLD:-30}
     HIGH_THRESHOLD=${HIGH_THRESHOLD:-80}
     POLL_INTERVAL=${POLL_INTERVAL:-300}
-    ENABLE_LOG=${ENABLE_LOG:-false}
+    ENABLE_LOG=${ENABLE_LOG:-true}
 else
     # 如果配置文件不存在，使用默认值
     LOW_THRESHOLD=30
     HIGH_THRESHOLD=80
     POLL_INTERVAL=300
-    ENABLE_LOG=false
-fi
-
-# 动态更新 module.prop 中的描述，替换占位符为实际值
-MODPROP="$MODDIR/module.prop"
-if [ -f "$MODPROP" ]; then
-    # 调试：输出变量值
-    echo "[ChargeControl] 更新 module.prop: LOW_THRESHOLD=$LOW_THRESHOLD, HIGH_THRESHOLD=$HIGH_THRESHOLD"
-    # 替换描述中的占位符为实际值（保留原有格式和间距）
-    sed -i "s|LOW_THRESHOLD|${LOW_THRESHOLD}|g; s|HIGH_THRESHOLD|${HIGH_THRESHOLD}|g" "$MODPROP"
+    ENABLE_LOG=true
 fi
 
 # 输出安装信息
