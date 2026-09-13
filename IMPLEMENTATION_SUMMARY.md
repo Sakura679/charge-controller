@@ -19,6 +19,19 @@
   - 例如，当前配置中 LOW_THRESHOLD=30, HIGH_THRESHOLD=80，安装后 module.prop 描述将变为:
     `description=充电阈值控制：低于30% 开始充电，高于80% 停止充电，循环。`
 
+### 3. 修复日志问题并添加日志轮转功能
+- 问题: 即使配置文件中 `ENABLE_LOG=false`，模块仍会产生日志文件并随时间增长
+- 根本原因:
+  1. `service.sh` 中无条件地将守护进程输出重定向到 `log.txt`
+  2. `charger-daemon.sh` 中的错误消息直接写入日志文件，不受 `ENABLE_LOG` 控制
+- 解决方案:
+  1. 修复 `service.sh`: 根据 `ENABLE_LOG` 值有条件地重定向输出
+  2. 修复 `charger-daemon.sh`: 
+     - 将直接写入日志的错误消息改为使用 `log_msg()` 函数
+     - 添加日志轮转机制：每小时检查一次日志文件大小，超过1MB时保留最近100行
+     - 添加日志轮转状态消息（仅在日志启用时记录）
+  3. 更新模块版本至 1.0.6
+
 ## 工作原理
 
 1. 用户通过 Magisk 安装模块时
@@ -37,4 +50,4 @@
 - customize.sh (新增) - 安装时执行的脚本
 - module.prop (未更改但现在能动态更新) - 模块属性文件
 - config/default.conf - 配置文件
-- 现有脚本: charger-daemon.sh, post-fs-data.sh, service.sh, uninstall.sh (保持不变)
+- 现有脚本: charger-daemon.sh (已修复日志问题并添加轮转), post-fs-data.sh, service.sh (已修复条件日志重定向), uninstall.sh (保持不变)

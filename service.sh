@@ -42,8 +42,12 @@ fi
 
 # 启动守护进程（后台、脱离终端）
 log_msg "启动充电控制守护进程…"
-setsid sh "$DAEMON" \
-    >>"$MODDIR/log.txt" 2>&1 &
+if [ "$ENABLE_LOG" = true ]; then
+    setsid sh "$DAEMON" \
+        >>"$MODDIR/log.txt" 2>&1 &
+else
+    setsid sh "$DAEMON" >/dev/null 2>&1 &
+fi
 echo $! > "$PIDFILE"
 log_msg "守护进程已启动，PID=$(cat "$PIDFILE")"
 log_msg "=== service.sh 结束 ==="

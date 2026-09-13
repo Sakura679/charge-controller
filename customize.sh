@@ -35,7 +35,7 @@ fi
 MODPROP="$MODDIR/module.prop"
 if [ -f "$MODPROP" ]; then
     # 构建新的描述行
-    NEW_DESC="充电阈值控制：低于${LOW_THRESHOLD}% 开始充电，高于${HIGH_THRESHOLD}% 停止充电，循环。"
+    NEW_DESC="充电阈值控制：低于 ${LOW_THRESHOLD}% 开始充电，高于 ${HIGH_THRESHOLD}% 停止充电，循环。"
     # 替换 description 行（以 description= 开头的行）
     sed -i "s|^description=.*|description=${NEW_DESC}|" "$MODPROP"
 fi

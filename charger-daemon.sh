@@ -31,7 +31,7 @@ elif [ -w "$MMI_CHARGING_ENABLE" ]; then
     USE_THRESHOLDS=false
     SWITCH_NODE="$MMI_CHARGING_ENABLE"
 else
-    echo "$(date) 错误：运行时未找到可写的充电控制接口，守护进程退出" >>"$MODDIR/log.txt"
+    log_msg "错误：运行时未找到可写的充电控制接口，守护进程退出"
     exit 1
 fi
 
@@ -50,10 +50,29 @@ fi
 
 log_msg "守护进程启动（模式=${MODE_DESC}，LOW=$LOW_THRESHOLD% HIGH=$HIGH_THRESHOLD% INTERVAL=$POLL_INTERVAL秒）"
 
+# 日志轮转间隔（每隔多少次循环轮转一次，目标是每小时）
+LOG_ROTATION_INTERVAL=$(( 3600 / POLL_INTERVAL ))
+if [ $LOG_ROTATION_INTERVAL -lt 1 ]; then
+    LOG_ROTATION_INTERVAL=1
+fi
+loop_count=0
+
+# 日志轮转函数
+rotate_logs() {
+    if [ "$ENABLE_LOG" = true ] && [ -f "$MODDIR/log.txt" ]; then
+        # 检查日志文件大小是否超过 1MB
+        if [ $(wc -c < "$MODDIR/log.txt") -gt 1048576 ]; then
+            # 保留最近100行
+            tail -n 100 "$MODDIR/log.txt" > "$MODDIR/log.txt.tmp" && mv "$MODDIR/log.txt.tmp" "$MODDIR/log.txt"
+            log_msg "日志已轮转（保留最近100行）"
+        fi
+    fi
+}
+
 get_battery_capacity() {
     local cap
     cap=$(cat /sys/class/power_supply/battery/capacity 2>/dev/null) || {
-        echo "$(date) 错误：无法读取电量，守护进程退出" >>"$MODDIR/log.txt"
+        log_msg "错误：无法读取电量，守护进程退出"
         exit 1
     }
     echo "$cap"
@@ -85,5 +104,13 @@ while true; do
         log_msg "电量 $CAP% ≥ $HIGH_THRESHOLD% → 关闭充电"
     fi
     # 其余区间保持现状，不做任何写入，以免频繁触发充电IC
+
+    # 更新循环计数器并检查是否需要轮转日志
+    loop_count=$((loop_count + 1))
+    if [ $loop_count -ge $LOG_ROTATION_INTERVAL ]; then
+        rotate_logs
+        loop_count=0
+    fi
+
     sleep "$POLL_INTERVAL"
 done
