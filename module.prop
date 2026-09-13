@@ -1,7 +1,7 @@
 id=charge-controller
 name=Charge Controller Module
-version=1.0.4
-versionCode=4
+version=1.0.5
+versionCode=5
 author=Sakura679
 description=充电阈值控制：低于LOW_THRESHOLD% 开始充电，高于HIGH_THRESHOLD% 停止充电，循环。
 minMagisk=23000
