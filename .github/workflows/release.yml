@@ -77,6 +77,11 @@ jobs:
           # Set up git to use the GITHUB_TOKEN for authentication
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
+      - name: Fix line endings
+        run: |
+          find . -type f -name "*.sh" -exec dos2unix {} \;
+          find . -type f -name "*.rc" -exec dos2unix {} \;
+
       - name: Check if tag exists
         id: tag_check
         run: |
