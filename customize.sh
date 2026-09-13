@@ -11,11 +11,6 @@ chmod 755 "$MODDIR/service.sh"
 chmod 755 "$MODDIR/uninstall.sh"
 chmod 755 "$MODDIR/customize.sh"
 
-# 创建必要的目录（如果不存在的话）
-mkdir -p "$MODDIR"
-mkdir -p "$MODDIR/config"
-mkdir -p "$MODDIR/system/etc/init"
-
 # 读取配置文件中的实际值
 CONF="$MODDIR/config/default.conf"
 if [ -f "$CONF" ]; then
@@ -30,12 +25,14 @@ else
     LOW_THRESHOLD=30
     HIGH_THRESHOLD=80
     POLL_INTERVAL=300
-    ENABLE_LOG=true
+    ENABLE_LOG=false
 fi
 
 # 动态更新 module.prop 中的描述，替换占位符为实际值
 MODPROP="$MODDIR/module.prop"
 if [ -f "$MODPROP" ]; then
+    # 调试：输出变量值
+    echo "[ChargeControl] 更新 module.prop: LOW_THRESHOLD=$LOW_THRESHOLD, HIGH_THRESHOLD=$HIGH_THRESHOLD"
     # 替换描述中的占位符为实际值（保留原有格式和间距）
     sed -i "s|LOW_THRESHOLD|${LOW_THRESHOLD}|g; s|HIGH_THRESHOLD|${HIGH_THRESHOLD}|g" "$MODPROP"
 fi
